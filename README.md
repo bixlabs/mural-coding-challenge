@@ -1,5 +1,7 @@
 # Mural Pay – Coding Challenge Summary
 
+This project is a Single Page Application (SPA) built for the Mural Pay Coding Challenge (2025). It enables users to create customers and accounts, request and execute payouts, view payout statuses, and integrates with two public APIs (JSONPlaceholder and IP-API) to enhance functionality, using the Mural Pay API Sandbox (mocked due to access constraints). The app is developed with TypeScript, React, and modern tooling.
+
 ## ✅ Implemented
 
 ### Required by the challenge
@@ -28,7 +30,7 @@
 
 ## ⏳ Pending (due to time constraints)
 
-- Full integration with the real Sandbox API (remove `worker.start()` and adjust)
+- Full integration with the real Sandbox API
 - Component-level tests with Testing Library
 
 ## 🔐 Security & API Key Disclaimer
@@ -76,8 +78,8 @@ Pages use a single “smart” component handling data logic via hooks. In produ
 
 ## 🌐 Additional Public APIs
 
-- **JSONPlaceholder**: `https://jsonplaceholder.typicode.com/users`
-- **IP‑API**: `http://ip-api.com/json/` — used to calculate user's proximity to each currency’s country using airport coordinates
+- **JSONPlaceholder** (`https://jsonplaceholder.typicode.com/users`): Provides mock recipient data for payout requests, simulating realistic user information.
+- **IP-API** (`http://ip-api.com/json/`): Fetches the user's geolocation to prioritize currency options based on proximity to each currency’s country. Currencies are sorted with the closest one first (e.g., USD for a US-based user). This enhances UX by presenting the most relevant currency by default.
 
 ## ⏱ Time Spent
 
@@ -100,19 +102,38 @@ This estimate does **not** include:
 
 ## 🔮 Potential Improvements
 
-- Add client-side filters for payout table (status, currency)
-- Simulate API effects with in-memory CRUD
-- Enforce full client-side validation on amount and currency
-- Support multiple payout methods per recipient
-- Refactor and reuse shared types across modules
-- Add component tests with Testing Library
-- Improve UX: error handling, toasts, loading indicators
+- Full integration with Sandbox API
+- Execution and cancellation of payouts
+- Component testing with Testing Library
+- Full CRUD emulation and client-side validation
+- Shared type normalization
+- UI/UX polish (toasts, error states, loading skeletons)
+- Recipient filtering and business/multi-method support
 
 ## 🛠 Getting Started
 
 ```bash
-pnpm dev       # start local dev server
-pnpm test      # run unit tests
-pnpm cy:open   # open Cypress runner
-pnpm cy:run    # run Cypress headless
+pnpm dev
+```
+
+## 🧪 Running Tests
+
+### Unit tests
+
+```bash
+pnpm test
+```
+
+### Cypress (E2E) tests
+
+To open the runner:
+
+```bash
+pnpm cy:open
+```
+
+To run headless:
+
+```bash
+pnpm cy:run
 ```
