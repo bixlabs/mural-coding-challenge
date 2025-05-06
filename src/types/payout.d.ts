@@ -17,16 +17,24 @@ export interface CreatePayoutItem {
 	supportingDetails?: SupportingDetails;
 }
 
-export type CreatePayoutRequestDetails =
-	| USDPayoutDetails
-	| ARSPayoutDetails
-	| EURPayoutDetails
-	| MXNPayoutDetails
-	| BRLPayoutDetails
-	| CLPPayoutDetails
-	| PENPayoutDetails
-	| BOBPayoutDetails
-	| COPPayoutDetails;
+export type CreatePayoutRequestDetails = FiatPayoutDetailsReq | BlockchainPayoutDetails;
+
+export interface FiatPayoutDetailsReq {
+	type: 'fiat';
+	bankName: string;
+	bankAccountOwner: string;
+	fiatAndRailDetails:
+		| USDPayoutDetails
+		| COPPayoutDetails
+		| ARSPayoutDetails
+		| MXNPayoutDetails
+		| BRLPayoutDetails
+		| CLPPayoutDetails
+		| PENPayoutDetails
+		| BOBPayoutDetails
+		| CRCPayoutDetails
+		| ZARPayoutDetails;
+}
 
 export interface USDPayoutDetails {
 	type: 'usd';
@@ -36,38 +44,91 @@ export interface USDPayoutDetails {
 	bankRoutingNumber: string;
 }
 
-// All these details were simplified to only include the type and symbol.
+export interface COPPayoutDetails {
+	type: 'cop';
+	symbol: 'COP';
+	phoneNumber: string;
+	accountType: 'CHECKING' | 'SAVINGS';
+	bankAccountNumber: string;
+	documentNumber: string;
+	documentType: 'NATIONAL_ID' | 'PASSPORT' | 'RESIDENT_ID' | 'RUC';
+}
+
 export interface ARSPayoutDetails {
 	type: 'ars';
 	symbol: 'ARS';
+	bankAccountNumber: string;
+	documentNumber: string;
+	bankAccountNumberType: string;
 }
+
 export interface EURPayoutDetails {
 	type: 'eur';
 	symbol: 'EUR';
+	iban: string;
+	swiftBic: string;
+	country: string;
 }
 export interface MXNPayoutDetails {
 	type: 'mxn';
 	symbol: 'MXN';
+	bankAccountNumber: string;
 }
 export interface BRLPayoutDetails {
 	type: 'brl';
 	symbol: 'BRL';
+	pixAccountType: 'PHONE' | 'EMAIL' | 'DOCUMENT' | 'BANK_ACCOUNT';
+	pixEmail: string;
+	pixPhone: string;
+	branchCode: string;
+	documentNumber: string;
 }
 export interface CLPPayoutDetails {
 	type: 'clp';
 	symbol: 'CLP';
+	accountType: 'CHECKING' | 'SAVINGS';
+	bankAccountNumber: string;
+	documentType: 'NATIONAL_ID' | 'PASSPORT' | 'RESIDENT_ID' | 'RUC';
+	documentNumber: string;
 }
 export interface PENPayoutDetails {
 	type: 'pen';
 	symbol: 'PEN';
+	documentNumber: string;
+	documentType: 'NATIONAL_ID' | 'PASSPORT' | 'RESIDENT_ID' | 'RUC';
+	bankAccountNumber: string;
+	accountType: 'CHECKING' | 'SAVINGS';
 }
 export interface BOBPayoutDetails {
 	type: 'bob';
 	symbol: 'BOB';
+	bankAccountNumber: string;
+	documentNumber: string;
+	documentType: 'NATIONAL_ID' | 'PASSPORT' | 'RESIDENT_ID' | 'RUC';
 }
-export interface COPPayoutDetails {
-	type: 'cop';
-	symbol: 'COP';
+
+export interface CRCPayoutDetails {
+	type: 'crc';
+	symbol: 'CRC';
+	iban: string;
+	documentNumber: string;
+	documentType: 'NATIONAL_ID' | 'PASSPORT' | 'RESIDENT_ID' | 'RUC';
+	bankAccountNumber: string;
+}
+
+export interface ZARPayoutDetails {
+	type: 'zar';
+	symbol: 'ZAR';
+	accountType: 'CHECKING' | 'SAVINGS';
+	bankAccountNumber: string;
+}
+
+export interface BlockchainPayoutDetails {
+	type: 'blockchain';
+	walletDetails: {
+		walletAddress: string;
+		blockchain: BlockchainNetwork;
+	};
 }
 
 export interface RecipientInfo {

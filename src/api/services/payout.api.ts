@@ -1,4 +1,4 @@
-import { MURAL_TRANSFER_API_KEY, muralApi } from '@/api/clients/mural.api';
+import { makeHeadersWithTransferApiKey, muralApi } from '@/api/clients/mural.api';
 import {
 	CreatePayoutRequestReq,
 	CreatePayoutRequestRes,
@@ -25,10 +25,8 @@ export async function createPayoutRequest(payload: CreatePayoutRequestReq): Prom
 export async function executePayoutRequest(payoutId: string): Promise<ExecutePayoutRequestRes> {
 	try {
 		return await muralApi
-			.post(`payouts/${payoutId}/execute`, {
-				headers: {
-					'transfer-api-key': MURAL_TRANSFER_API_KEY,
-				},
+			.post(`payouts/payout/${payoutId}/execute`, {
+				headers: makeHeadersWithTransferApiKey(),
 			})
 			.json();
 	} catch (error) {

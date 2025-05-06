@@ -1,26 +1,20 @@
-import { Balance } from '@/types/account';
+import { Account } from '@/types/account';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
 type AccountState = {
-	accountId?: string;
-	accountBalances?: Balance[];
-	setAccountId: (accountId: string) => void;
-	setAccountBalances: (balances: Balance[]) => void;
-	clearAccount: () => void;
+	lastCreatedAccount?: Account;
+	setLastCreatedAccount: (lastCreatedAccount: Account) => void;
 };
 
 export const useAccountStore = create<AccountState>()(
 	devtools(
 		persist(
 			(set) => ({
-				accountId: undefined,
-				accountBalances: [],
-				setAccountId: (accountId: string) => set(() => ({ accountId })),
-				setAccountBalances: (balances: Balance[]) => set(() => ({ accountBalances: balances })),
-				clearAccount: () => set(() => ({ accountId: undefined, accountBalances: [] })),
+				lastCreatedAccount: undefined,
+				setLastCreatedAccount: (lastCreatedAccount: Account) => set(() => ({ lastCreatedAccount })),
 			}),
-			{ name: 'account' }
+			{ name: 'accountStore' }
 		)
 	)
 );

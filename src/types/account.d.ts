@@ -10,7 +10,9 @@ export type Balance = Amount;
 
 export type CurrencyCode = Uppercase<FiatCurrencyCode>;
 
-export interface CreateAccountRes {
+export type CreateAccountRes = Account;
+
+export interface Account {
 	id: string;
 	name: string;
 	description: string;
@@ -44,3 +46,7 @@ export interface DepositAccount {
 	bankAccountNumber: string;
 	paymentRails: string[];
 }
+
+// ─── Get Accounts ───────────────────────────────────────────────────────────
+
+export type GetAccountsRes = Account[];

@@ -8,7 +8,6 @@ import { appToast } from '@/lib/toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
 import { z } from 'zod';
 
 const REQUIRED_ERROR_MESSAGE = 'Your account name is required';
@@ -19,7 +18,13 @@ const formSchema = z.object({
 			required_error: REQUIRED_ERROR_MESSAGE,
 		})
 		.min(1, { message: REQUIRED_ERROR_MESSAGE }),
-	description: z.string().optional(),
+	description: z
+		.string()
+		.transform((val) => (val?.trim() === '' ? undefined : val))
+		.optional()
+		.refine((val) => val === undefined || val.length >= 2, {
+			message: 'Description must be at least 2 characters',
+		}),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -27,6 +32,10 @@ type FormSchema = z.infer<typeof formSchema>;
 export default function AccountCreationPage() {
 	const form = useForm<FormSchema>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: '',
+			description: '',
+		},
 	});
 
 	const {
@@ -34,8 +43,6 @@ export default function AccountCreationPage() {
 		reset,
 		formState: { isSubmitting },
 	} = form;
-
-	const navigate = useNavigate();
 
 	const { createAccount } = useCreateAccount();
 
@@ -50,12 +57,11 @@ export default function AccountCreationPage() {
 					onSuccess: async () => {
 						appToast.success('Account created successfully');
 						reset();
-						navigate('/');
 						resolve(void 0);
 					},
-					onError: () => {
-						appToast.error('Failed to create account');
-						reject();
+					onError: (error: Error) => {
+						appToast.error(error.message);
+						reject(error);
 					},
 				}
 			)
@@ -69,7 +75,7 @@ export default function AccountCreationPage() {
 					<form onSubmit={handleSubmit(handleCreateAccount)}>
 						<CardHeader className="mb-6">
 							<CardTitle>Create Account</CardTitle>
-							<CardDescription>Set up your account details</CardDescription>
+							<CardDescription>Name and description can be edited anytime</CardDescription>
 						</CardHeader>
 
 						<CardContent className="space-y-6">
@@ -78,11 +84,11 @@ export default function AccountCreationPage() {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>Account Name</FormLabel>
 										<FormControl>
-											<Input placeholder="Your account name" {...field} />
+											<Input placeholder="Contractors" {...field} />
 										</FormControl>
-										<FormMessage />
+										<FormMessage data-testid="name-error" />
 									</FormItem>
 								)}
 							/>
@@ -94,9 +100,9 @@ export default function AccountCreationPage() {
 									<FormItem>
 										<FormLabel>Description</FormLabel>
 										<FormControl>
-											<Textarea placeholder="Optional description" className="resize-none" {...field} />
+											<Textarea placeholder="Write a brief description (optional)" className="resize-none" {...field} />
 										</FormControl>
-										<FormMessage />
+										<FormMessage data-testid="description-error" />
 									</FormItem>
 								)}
 							/>

@@ -12,7 +12,7 @@ export function useExecutePayoutRequest() {
 		payoutRequestId: string,
 		options?: {
 			onSuccess?: () => void;
-			onError?: () => void;
+			onError?: (error: Error) => void;
 		}
 	) {
 		mutation.mutate(payoutRequestId, {
@@ -20,8 +20,8 @@ export function useExecutePayoutRequest() {
 				queryClient.invalidateQueries({ queryKey: ['payoutRequests'] });
 				options?.onSuccess?.();
 			},
-			onError: () => {
-				options?.onError?.();
+			onError: (error) => {
+				options?.onError?.(error);
 			},
 		});
 	}

@@ -1,8 +1,8 @@
-import ky from 'ky';
+import { httpClient } from './httpClient';
 
 const IP_API_URL = 'http://ip-api.com/json/';
 
-const ipApi = ky.create({
+export const ipApi = httpClient.extend({
 	prefixUrl: IP_API_URL,
 });
 

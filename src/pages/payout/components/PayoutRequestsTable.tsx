@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useExecutePayoutRequest } from '@/hooks/useExecutePayoutRequest';
+import { useGetAccounts } from '@/hooks/useGetAccounts';
 import { useSearchPayoutRequests } from '@/hooks/useSearchPayoutRequests';
 import { cn } from '@/lib/utils';
 import { PayoutResponseItem, PayoutStatus } from '@/types/payout';
@@ -70,7 +71,7 @@ const getPayoutDetails = (payout: PayoutResponseItem) => {
 	if (details.type === 'blockchain') {
 		return `${details.blockchain} • ${details.walletAddress.slice(0, 6)}...${details.walletAddress.slice(-4)}`;
 	} else {
-		return `${details.fiatAmount.fiatCurrencyCode} (${details.fiatAndRailCode})`;
+		return `${details.fiatAmount.fiatAmount} ${details.fiatAmount.fiatCurrencyCode} (${details.fiatAndRailCode})`;
 	}
 };
 
@@ -79,6 +80,12 @@ export function PayoutRequestsTable() {
 	const { executePayoutRequest } = useExecutePayoutRequest();
 	const [executingPayoutRequestId, setExecutingPayoutRequestId] = useState<string | null>(null);
 
+	const { accounts } = useGetAccounts();
+
+	const getSourceAccount = (sourceAccountId: string) => {
+		return accounts?.find((account) => account.id === sourceAccountId)?.name;
+	};
+
 	function handleClickExecutePayoutRequest(payoutRequestId: string) {
 		setExecutingPayoutRequestId(payoutRequestId);
 		executePayoutRequest(payoutRequestId, {
@@ -86,9 +93,9 @@ export function PayoutRequestsTable() {
 				setExecutingPayoutRequestId(null);
 				toast.success('Payout request executed successfully');
 			},
-			onError: () => {
+			onError: (error: Error) => {
 				setExecutingPayoutRequestId(null);
-				toast.error('Failed to execute payout request');
+				toast.error(error.message);
 			},
 		});
 	}
@@ -107,10 +114,11 @@ export function PayoutRequestsTable() {
 				<TableCaption className="text-muted-foreground">Payout requests and their current statuses</TableCaption>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="min-w-[120px] px-4 py-3">Request ID</TableHead>
-						<TableHead className="min-w-[140px] px-4 py-3">Created</TableHead>
+						<TableHead className="min-w-[120px] px-4 py-3">Payout ID</TableHead>
+						<TableHead className="min-w-[140px] px-4 py-3">Created At</TableHead>
+						<TableHead className="px-4 py-3">From</TableHead>
 						<TableHead className="px-4 py-3">Status</TableHead>
-						<TableHead className="px-4 py-3">Amount</TableHead>
+						<TableHead className="px-4 py-3">Amount Sent</TableHead>
 						<TableHead className="px-4 py-3">Type</TableHead>
 						<TableHead className="px-4 py-3">Details</TableHead>
 						<TableHead className="px-4 py-3 text-right">Actions</TableHead>
@@ -125,6 +133,7 @@ export function PayoutRequestsTable() {
 								<TableCell className="text-sm text-muted-foreground px-4 py-3">
 									{formatDate(payoutRequest.createdAt)}
 								</TableCell>
+								<TableCell className="px-4 py-3">{getSourceAccount(payoutRequest.sourceAccountId)}</TableCell>
 								<TableCell className="px-4 py-3">{getStatusBadge(payoutRequest.status)}</TableCell>
 								<TableCell className="text-sm px-4 py-3">
 									{payoutRequest.payouts.length > 0

@@ -14,31 +14,23 @@ import PayoutSearchPage from './pages/payout/PayoutSearchPage.tsx';
 
 const queryClient = new QueryClient();
 
-async function enableMocking() {
-	const { worker } = await import('./mocks/browser');
-
-	return worker.start();
-}
-
-enableMocking().then(() => {
-	createRoot(document.getElementById('root')!).render(
-		<StrictMode>
-			<QueryClientProvider client={queryClient}>
-				<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-					<BrowserRouter>
-						<ToastRootContainer />
-						<Routes>
-							<Route path="/" element={<BaseLayout />}>
-								<Route path="/accounts/create" element={<AccountCreationPage />} />
-								<Route index element={<HomePage />} />
-								<Route path="/payouts/create" element={<PayoutCreationPage />} />
-								<Route path="/payouts/search" element={<PayoutSearchPage />} />
-							</Route>
-						</Routes>
-					</BrowserRouter>
-				</ThemeProvider>
-				<ReactQueryDevtools initialIsOpen={false} />
-			</QueryClientProvider>
-		</StrictMode>
-	);
-});
+createRoot(document.getElementById('root')!).render(
+	<StrictMode>
+		<QueryClientProvider client={queryClient}>
+			<ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+				<BrowserRouter>
+					<ToastRootContainer />
+					<Routes>
+						<Route path="/" element={<BaseLayout />}>
+							<Route path="/accounts/create" element={<AccountCreationPage />} />
+							<Route index element={<HomePage />} />
+							<Route path="/payouts/create" element={<PayoutCreationPage />} />
+							<Route path="/payouts/search" element={<PayoutSearchPage />} />
+						</Route>
+					</Routes>
+				</BrowserRouter>
+			</ThemeProvider>
+			<ReactQueryDevtools initialIsOpen={false} />
+		</QueryClientProvider>
+	</StrictMode>
+);

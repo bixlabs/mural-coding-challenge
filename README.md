@@ -1,139 +1,197 @@
 # Mural Pay – Coding Challenge Summary
 
-This project is a Single Page Application (SPA) built for the Mural Pay Coding Challenge (2025). It enables users to create customers and accounts, request and execute payouts, view payout statuses, and integrates with two public APIs (JSONPlaceholder and IP-API) to enhance functionality, using the Mural Pay API Sandbox (mocked due to access constraints). The app is developed with TypeScript, React, and modern tooling.
+This is a Single Page Application (SPA) built as part of the 2025 Mural Pay Coding Challenge. The application interacts with the Mural Pay Sandbox API to allow users to manage accounts and initiate payouts. It also integrates a public geolocation API to enhance the recipient selection experience.
 
-## ✅ Implemented
+## 🎯 Challenge Requirements Completed
 
-### Required by the challenge
+All core requirements from the challenge brief were implemented:
 
-> All required interactions with the Mural API are implemented using **mocked responses via MSW** due to lack of Sandbox access.
+1. ✅ **Customer & account creation** via API form  
+2. ✅ **Payout request creation**, including fiat and blockchain methods  
+3. ✅ **Payout execution** (note: a 500 error is returned by the API when sufficient funds are present—see notes below)  
+4. ✅ **View payout request history and statuses** for a given account  
+   > ℹ️ The payout search lists all payouts associated with the current bearer token, which maps to the currently active account. If the requirement referred to filtering payouts for an arbitrary account, that could be implemented as a future enhancement.  
+5. ✅ **Public API integration**:  
+   - IP-based geolocation (`ip-api.com`) used to order recipients by proximity in the payout form
 
-- Customer and account creation (mocked)
-- Payout request creation (mocked)
-- Payout request execution (mocked)
-- Viewing payout requests and their statuses (mocked)
-- Integration with a public API (extended to **two**)
+## 💡 UX Enhancements
 
-### Additional features and tooling
+All enhancements below were implemented specifically on the **Create Payout Request** screen:
 
-- Integration with **two** external APIs:
-  - **JSONPlaceholder** for recipient mock data (`/users`)
-  - **IP-API** for geolocation to prioritize currency options
-- Responsive UI with **Tailwind CSS** and **shadcn/ui** components
-- Form managed via **React Hook Form** + **Zod** validation
-- State management with **Zustand** (persisted to localStorage)
-- Data fetching & mutations with **TanStack Query** (`useQuery`, `useMutation`, `useInfiniteQuery`)
-- HTTP client choice: **Ky** for quick setup (would use `fetch` wrapper in production)
-- Mock API layer powered by **MSW**
-- Cypress E2E test for account creation
-- Unit test for geo-distance utility
+- **Smart recipient ordering**: Recipients are sorted by geographic distance to the user (based on IP geolocation), increasing the likelihood of selecting someone geographically closer. This behavior works correctly in local development, though it's currently not functioning in the deployed version for reasons under investigation.
 
-## ⏳ Pending (due to time constraints)
+<p align="center">
+  <img src="./src/assets/working-recipient-local.png" alt="Recipient ordering working locally" width="350"/>
+</p>
 
-- Full integration with the real Sandbox API
-- Component-level tests with Testing Library
+> Recipients are sorted by geographic proximity based on the user's IP. The distances are calculated from Montevideo (Uruguay) to each country’s main international airport (e.g., Ezeiza for Argentina, Guarulhos for Brazil). As shown, nearby countries appear first, which is the intended behavior.
 
-## 🔐 Security & API Key Disclaimer
+- **Persistent "New" account badge**: The most recently created account is saved in local storage and marked with a 🆕 badge in the source account selector.
+- **Main account pre-selection**: If the user has a main account, it is automatically pre-selected in the "Source Account" dropdown, reducing friction in frequent payout flows.
 
-API keys are exposed on the client side, which is insecure in production. This was necessary to meet the SPA requirement without a backend. In a real-world app, keys would be kept secret on a secure server proxy.
+## ⚙️ Stack & Tooling
+
+- **Framework**: React + TypeScript  
+- **Forms**: React Hook Form + Zod  
+- **UI**: Tailwind CSS + shadcn/ui  
+- **State Management**: Zustand (with localStorage persistence)  
+- **Data Fetching**: TanStack Query  
+- **HTTP Client**: Ky  
+- **Mocking Layer**: MSW (used early in development)  
+- **Testing**: Cypress (E2E), Vitest (unit tests)
 
 ## 📁 Project Structure
 
-Technology-based layout, grouping by role rather than feature or domain:
+The project follows a modular and role-based layout, grouping logic by responsibility (e.g., API, UI, state) instead of domain:
 
 ```
 src/
-├── api/          # HTTP clients & service wrappers
-├── components/   # UI components (incl. shadcn/ui)
-├── hooks/        # Custom data-fetching & state hooks
-├── layouts/      # Layout components
-├── lib/          # Utilities & toasts
-├── mocks/        # MSW handlers
-├── pages/        # Next.js/Vite routes
-├── stores/       # Zustand stores
-├── types/        # Core domain types
-└── main.tsx
+├── api/          # External API clients and domain-level service methods
+├── components/   # Shared UI components (shadcn/ui wrappers) and theme provider
+├── hooks/        # React Query and business logic hooks
+├── layouts/      # Page layout wrapper (BaseLayout)
+├── lib/          # Utilities (toasts, geolocation, shared helpers)
+├── pages/        # Route-based pages (account, payout, home)
+├── stores/       # Global state store (single-purpose)
+├── types/        # Core domain type declarations (account, payout)
 ```
 
-## 🧾 Type Organization
+Key patterns worth noting:
 
-- Core Mural API and domain types in `src/types`
-- Inline types for infra or third‑party APIs (e.g. JSONPlaceholder, IP‑API) to keep them close to usage
-- Mix of `type` and `interface` due to QuickType generation
+- **API separated into `clients` and `services`**, isolating low-level HTTP config from business concerns  
+- **Hooks abstract side effects and server interactions**, keeping pages declarative  
+- **Each route (e.g. `/account`, `/payout`) has its own page + co-located components**
 
-## 🧠 Data Fetching & Caching
+## 🧠 Type Strategy
 
-- **TanStack Query** for declarative fetch/caching
-- No custom `staleTime`/`cacheTime` due to time constraints; would tune in a production setting
+- Core domain models are located in `src/types`
+- External API types are colocated with usage
+- Mixed usage of `type` and `interface`:
+  - Auto-generated interfaces from Mural API JSON examples
+  - Manual types follow a consistent `type` convention
 
-## 🧱 Component & Page Structure
+## 🧪 Testing
 
-Pages use a single “smart” component handling data logic via hooks. In production, pages would handle routing/layout and delegate UI to presentational components.
+- ✅ **E2E (Cypress)**: Account creation flow  
+- ✅ **Unit (Vitest)**: Geo-distance sorting logic  
+- 🚫 Component-level testing was deprioritized due to time constraints
 
-## 🧪 Automated Testing
+## 🧭 API Integration Notes
 
-- **E2E**: account creation (Cypress)
-- **Unit**: geo-distance utility
-- Component tests were omitted due to initial setup overhead and time prioritization.
+- **Execute Payout**:
+  - Returns a `500 Internal Server Error` when the source account has sufficient balance.
+  - Returns a proper “insufficient funds” error when balance is lacking.
 
-## 🌐 Additional Public APIs
+- **Recipient Validation (ARS payouts)**:
+  - If the `bankAccountNumber` doesn’t meet expected length, the API throws a 500 instead of a validation error.
 
-- **JSONPlaceholder** (`https://jsonplaceholder.typicode.com/users`): Provides mock recipient data for payout requests, simulating realistic user information.
-- **IP-API** (`http://ip-api.com/json/`): Fetches the user's geolocation to prioritize currency options based on proximity to each currency’s country. Currencies are sorted with the closest one first (e.g., USD for a US-based user). This enhances UX by presenting the most relevant currency by default.
+- **Account propagation delay**:
+  - As noted in Mural API documentation, account creation is **eventually consistent**. If a payout is requested immediately after creating an account, the API may return an error indicating that the account does not exist yet. A short delay is recommended between creation and first use.
 
-## ⏱ Time Spent
+- **Hardcoded Recipients**:
+  - For time efficiency and to avoid building dynamic forms per payout type, a simplified list of recipients was hardcoded (1 per fiat country + 1 blockchain recipient). This ensures payouts are testable for all methods.
+  - In a real-world scenario, recipients would be managed as user-owned contacts in the backend.
 
-Total development time was approximately **6 hours**, including full project setup, type definitions, and core implementation work.
+- **Missing Pagination in Search Payouts**:
+  - Due to time constraints, the payout list is not paginated. The most recent payouts are shown at the top, and older entries may fall off the list.
 
-This estimate does **not** include:
+## 🌐 Public APIs Used
 
-- Time spent waiting or being blocked due to environment/setup issues
-- Time spent thinking through architecture or UX flow
-- Time invested in understanding the Mural API
-- Final refactoring or polish
-- Building the MSW-based workaround for the lack of Sandbox access
+- **IP-API** (`http://ip-api.com/json/`)  
+  Used to detect the user's approximate location (via IP) and sort recipients by geographic proximity in the payout creation form.
+  Used to detect the user's approximate location (via IP) and sort recipients by geographic proximity in the payout creation form.
+
+  Used to detect the user's approximate location (via IP) and sort recipients by geographic proximity in the payout creation form.  
+
+  > 💡 While it’s possible to access geolocation via the browser's built-in API, this requires user consent. If the user denies it, no location data would be available. Using an external IP-based API ensures fallback access and served as a good opportunity to integrate a public service in this context.
+
+- **JSONPlaceholder**  
+  Used temporarily during early development to simulate recipient data before API access was granted. Fully removed in the final implementation.
+
+## ⏱ Time Allocation
+
+Total development time: **~8 hours**, split as follows:
+
+- ⏱ ~6 hours for core implementation:
+  - Project setup (Vite + Tailwind + testing + shadcn/ui)  
+  - Type definitions and form wiring  
+  - Mural API integration (initially with mock API)  
+  - Public API integration (IP-based geolocation)  
+  - State management and UX polish  
+
+- ⏱ ~2 hours for real API integration:
+  - Adapting code due to differences between the documentation and actual API behavior  
+  - Refactoring logic, payloads, and assumptions made during mocking phase  
+  - Re-validating flows and error handling with the real backend
+
+**Not included in this estimate:**
+
+- Reading and understanding the API/docs  
+- Designing the architecture and planning component responsibilities  
+- Mocking API behavior with MSW during early development  
+- Debugging unexpected API 500 errors  
+- Final polish and README documentation  
+- Fixing type errors in `PayoutRequestForm.tsx` (some were ignored for time efficiency)
+
+## 🔐 Security Notice
+
+As this is a frontend-only challenge, API keys are exposed in the client. In production, keys should be securely managed via a backend proxy.
 
 ## 🤖 Use of AI Tools
 
-- **Cursor autocompletion** (no agent) used to speed up boilerplate
-- **AI-generated mock data** for realism
-- **UI refinements** using AI prompts (no Figma available)
-- **V0** used to scaffold Create Payout Request UI in late stages
+- **Cursor autocompletion (no agent)** was used deliberately to speed up boilerplate writing, while ensuring that all logic and structure were written and reasoned manually for evaluation purposes.  
+- **V0** was used in the final stretch to scaffold the UI layout for the Create Payout Request screen, so I could quickly connect the logic I had already implemented.  
+- **AI prompts** were used to support basic UI/UX decisions, especially in the absence of a Figma reference, helping evaluate general visual clarity and layout balance.  
+
+Outside of the coding challenge context, I regularly use AI coding agents to accelerate development. For this project, I intentionally avoided agent-generated logic to ensure the submitted code reflects my own work and decisions. That said, I fully embrace productivity tooling in real-world environments.
 
 ## 🔮 Potential Improvements
 
-- Full integration with Sandbox API
-- Execution and cancellation of payouts
-- Component testing with Testing Library
-- Full CRUD emulation and client-side validation
-- Shared type normalization
-- UI/UX polish (toasts, error states, loading skeletons)
-- Recipient filtering and business/multi-method support
+If given more time, the following areas would be prioritized:
 
-## 🛠 Getting Started
+- Full pagination for the payouts table  
+- Dynamic form rendering based on payout type  
+- Component-level tests using Testing Library  
+- Full CRUD emulation for contacts/recipients  
+- Shared type normalization and schema extraction  
+- UX enhancements (loading skeletons, better empty states, inline errors)
+- Filtering payouts by `sourceAccountId` in the search table (to support listing payouts of a specific account explicitly)
+
+## 📌 Known Technical Debt
+
+- **PayoutRequestForm.tsx** was implemented under time constraints and has several improvement opportunities:
+  - Extract Zod schemas to dedicated files  
+  - Move internal logic (state, effects) to custom hooks  
+  - Create helper utilities for defaults and value transformations  
+  - Refactor into smaller components for maintainability
+
+## 🔧 Environment Variables
+
+To run the app with real API access, create a `.env` file in the project root with the following variables:
+
+```env
+VITE_MURAL_API_KEY=your_general_api_key_here
+VITE_MURAL_TRANSFER_API_KEY=your_transfer_api_key_here
+```
+
+These are required to authenticate with the Mural Pay Sandbox API.
+
+> ⚠️ In production, these keys should be stored securely and never exposed to the frontend.
+
+## 🚀 Getting Started
 
 ```bash
+pnpm install
 pnpm dev
 ```
 
 ## 🧪 Running Tests
 
-### Unit tests
-
 ```bash
+# Unit
 pnpm test
-```
 
-### Cypress (E2E) tests
-
-To open the runner:
-
-```bash
-pnpm cy:open
-```
-
-To run headless:
-
-```bash
-pnpm cy:run
+# Cypress (E2E)
+pnpm cy:open  # interactive
+pnpm cy:run   # headless
 ```

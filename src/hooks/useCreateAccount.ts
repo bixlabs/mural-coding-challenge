@@ -1,18 +1,19 @@
 import { createAccount } from '@/api/services/account.api';
 import { useAccountStore } from '@/stores/useAccountStore';
-import { CreateAccountRes } from '@/types/account';
 import { useMutation } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 export function useCreateAccount() {
-	const { setAccountId, setAccountBalances } = useAccountStore();
-
 	const mutation = useMutation({
 		mutationFn: createAccount,
-		onSuccess: (createAccountResponse: CreateAccountRes) => {
-			setAccountId(createAccountResponse.id);
-			setAccountBalances(createAccountResponse.accountDetails.balances);
-		},
 	});
+
+	const { setLastCreatedAccount } = useAccountStore();
+	useEffect(() => {
+		if (!mutation.data) return;
+
+		setLastCreatedAccount(mutation.data);
+	}, [mutation.data, setLastCreatedAccount]);
 
 	return {
 		...mutation,

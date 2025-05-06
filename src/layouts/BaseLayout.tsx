@@ -1,10 +1,8 @@
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useAccountStore } from '@/stores/useAccountStore';
 import { Link, Outlet, NavLink as RouterNavLink } from 'react-router';
 
 export function BaseLayout() {
-	const { accountId } = useAccountStore();
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<header className="border-b shadow-sm">
@@ -13,33 +11,19 @@ export function BaseLayout() {
 						<Logo />
 						<span className="text-lg font-semibold tracking-tight">Mural Coding Challenge</span>
 					</Link>
-					{accountId && (
-						<nav className="flex gap-2">
-							<NavLink to="/">Home</NavLink>
-							<NavLink to="/payouts/create">Create Payout</NavLink>
-							<NavLink to="/payouts/search">Search Payouts</NavLink>
-						</nav>
-					)}
+					<nav className="flex gap-2">
+						<NavLink to="/">Home</NavLink>
+						<NavLink to="/accounts/create">Create Account</NavLink>
+						<NavLink to="/payouts/create">Create Payout</NavLink>
+						<NavLink to="/payouts/search">Search Payouts</NavLink>
+					</nav>
 				</div>
 			</header>
 
-			<main className="mx-auto w-full max-w-5xl px-4 py-10">
+			<main className="mx-auto w-full max-w-6xl px-4 py-10">
 				<Outlet />
 			</main>
 		</div>
-	);
-}
-
-function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
-	return (
-		<RouterNavLink
-			to={to}
-			className={({ isActive }) =>
-				cn(buttonVariants({ variant: 'ghost' }), 'text-sm', isActive && 'text-primary underline underline-offset-4')
-			}
-		>
-			{children}
-		</RouterNavLink>
 	);
 }
 
@@ -62,5 +46,18 @@ function Logo() {
 			/>
 			<rect x="38" y="38" width="24" height="24" transform="rotate(45 50 50)" fill="currentColor" />
 		</svg>
+	);
+}
+
+function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
+	return (
+		<RouterNavLink
+			to={to}
+			className={({ isActive }) =>
+				cn(buttonVariants({ variant: 'ghost' }), 'text-sm', isActive && 'text-primary underline underline-offset-4')
+			}
+		>
+			{children}
+		</RouterNavLink>
 	);
 }
